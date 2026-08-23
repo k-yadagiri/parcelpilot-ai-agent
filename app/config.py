@@ -3,13 +3,11 @@ Central configuration for the ParcelPilot AI Agent.
 
 This module is the single source of truth for:
 - file paths
-- document reliability / precedence metadata (used by the retriever and the
-  system prompt so the agent can reason about which source wins in a conflict)
-- the dataset snapshot time (used as "now" for all time-based reasoning)
-
-Nothing here hard-codes example record IDs (ORD-1001, TKT-501, etc.) - only
-document-level metadata and generic policy structure.
+- document reliability / precedence metadata
+- the dataset snapshot time
+- Gemini model configuration
 """
+
 from pathlib import Path
 from datetime import datetime
 import os
@@ -23,22 +21,16 @@ XLSX_PATH = DATA_DIR / "ParcelPilot_Assessment_Data.xlsx"
 INDEX_PATH = DB_DIR / "doc_index.pkl"
 
 # Dataset snapshot time, per the workbook's README sheet.
-# All "how late is this", "has SLA been breached" style reasoning must use
-# this as "now", not the wall-clock time the app happens to run at.
-DATASET_SNAPSHOT_TIME = datetime(2026, 8, 16, 11, 0, 0)  # Asia/Kolkata
+# All time-based reasoning must use this timestamp as "now".
+DATASET_SNAPSHOT_TIME = datetime(2026, 8, 16, 11, 0, 0)
 
-ANTHROPIC_MODEL = os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-4-6")
+# Gemini configuration
+GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
 
 # ---------------------------------------------------------------------------
 # Document reliability / precedence metadata
 # ---------------------------------------------------------------------------
-# reliability_rank: lower number = higher authority when sources conflict.
-# This encodes the precedence rule stated in Support Policy v3 section 1:
-#   signed customer agreement  >  current support policy / current SOP
-#   >  current product documentation  >  deprecated documents (never authoritative)
-#
-# Customer agreements are further scoped to a single account_id so the
-# retriever/tooling can filter them out for customers on other accounts.
+
 DOCUMENTS = {
     "01_Support_Policy_v3_CURRENT.pdf": {
         "title": "Support Policy v3",
@@ -46,7 +38,7 @@ DOCUMENTS = {
         "status": "current",
         "reliability_rank": 2,
         "effective_date": "2026-05-01",
-        "account_id": None,  # applies to all accounts
+        "account_id": None,
         "notes": "Default severity definitions and first-response SLA targets.",
     },
     "02_Support_Policy_v2_DEPRECATED.pdf": {
