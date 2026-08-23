@@ -1,7 +1,7 @@
 streamlit==1.38.0
 langchain==0.3.7
-langchain-google-genai
 langgraph==0.2.45
+langchain-google-genai
 pypdf==5.0.1
 pandas==2.2.3
 openpyxl==3.1.5
