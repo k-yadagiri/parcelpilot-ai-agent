@@ -1,99 +1,110 @@
-# ParcelPilot AI Agent
+# 📦 ParcelPilot AI Agent
 
-An AI support agent for ParcelPilot, a B2B logistics platform, built for the
-CalQuity take-home assessment. It ships **both** user contexts:
+An AI-powered customer support and operations assistant for ParcelPilot, a B2B logistics platform.
 
-- **Customer-facing chat** - an authenticated customer asks about their
-  account, orders, cancellations, service credits, and SLAs.
-- **Internal support/ops assistant** - authorised ParcelPilot staff can look
-  up any account, run cross-account read-only analysis, and see a
-  **proactive issue detection** dashboard (SLA risk, recurring issue
-  clusters, unusual order patterns, ticket spikes per account).
+The system combines a conversational AI agent with document retrieval, structured operational data, and controlled state-changing actions to answer customer-support questions about orders, tickets, contracts, cancellations, service credits, SLAs, and product issues.
 
-The agent reasons only over the supplied data pack (6 PDFs + the Excel
-workbook), respects source precedence when documents conflict (signed
-customer agreement > current policy/SOP > current product docs > deprecated
-docs / historical tickets, which are context only), performs multi-step
-tool use, and requires explicit human confirmation before any
-state-changing action is executed.
+## 🚀 Live Application
 
-## Quick start
+**Try the deployed application:**
 
-```bash
-# 1. unzip and enter the project
-unzip ParcelPilot_AI_Agent_Final.zip -d ParcelPilot_AI_Agent
-cd ParcelPilot_AI_Agent
+https://parcelpilot-ai-agent-4nkrirwyfnerrj2zlrj2jp.streamlit.app/
 
-# 2. create a virtual environment
-python3 -m venv venv
-source venv/bin/activate        # on Windows: venv\Scripts\activate
+The application is deployed using Streamlit and provides a simple conversational interface for interacting with the ParcelPilot support agent.
 
-# 3. install dependencies
-pip install -r requirements.txt
+---
 
-# 4. configure your API key
-cp .env.example .env
-# edit .env and set ANTHROPIC_API_KEY=sk-ant-...
+## 📌 Project Overview
 
-# 5. build the local database from the supplied Excel workbook
-python -m app.build_db
+ParcelPilot support teams need to answer questions by checking multiple sources:
 
-# 6. run the tests (does not require a live API key)
-pytest -q
+- Customer agreements
+- Current support policies
+- Cancellation and service-credit SOPs
+- Product documentation
+- Historical support tickets
+- Account, order, and ticket data
 
-# 7. launch the app
-streamlit run streamlit_app.py
-```
+These sources are not equally reliable. A customer-specific agreement may override a general company policy, while deprecated documents and historical ticket resolutions may contain outdated or incorrect information.
 
-Open the URL Streamlit prints (usually http://localhost:8501). In the
-sidebar, choose **Customer** (and pick a mock account) or **ParcelPilot
-Internal Staff** to switch contexts - no real login system is implemented;
-this is mocked authentication, as explicitly permitted by the assessment.
+This project builds an AI support agent that combines these sources and applies source-precedence rules when answering questions.
 
-## Project layout
+---
 
-```
-app/
-  config.py       Paths, dataset snapshot time, document reliability metadata
-  retriever.py    PDF ingestion + TF-IDF document search with source metadata
-  build_db.py     Loads the Excel workbook into SQLite; creates action tables
-  tools.py        LangChain tools + access control + confirm-before-execute
-  agent.py        LangGraph agent (system prompt + tool wiring) per role
-  analytics.py    Proactive issue detection (SLA risk, clusters, patterns)
-streamlit_app.py  Chat UI + internal dashboard
-tests/            pytest suite (20 tests, no live API key required)
-docs/             architecture note, product note, demo script
-data/
-  raw_pdfs/       the 6 supplied PDFs (read at ingestion time)
-  ParcelPilot_Assessment_Data.xlsx
-  db/             generated SQLite DB + (nothing else persisted to disk)
-```
+## 🎯 Assessment Goals Addressed
 
-## Notes on design decisions
+The implementation is designed around the major requirements of the ParcelPilot AI Agent assessment:
 
-See `docs/ARCHITECTURE.md` and `docs/PRODUCT_NOTES.md` for the reasoning
-behind the retrieval approach, access-control enforcement, the
-confirm-before-execute action pattern, and how source conflicts/trust are
-handled. `docs/DEMO_SCRIPT.md` is a ~5 minute walkthrough script.
+- Natural-language support chatbot
+- Document search and retrieval
+- Structured account/order/ticket lookup
+- Multi-step tool usage
+- Access-controlled customer context
+- State-changing actions
+- Confirmation before state-changing actions
+- Source reliability and conflict handling
+- SLA and time-based reasoning
+- Product issue investigation
+- Streamlit-based chat interface
+- Hosted application
+- Proactive support/operations analysis
 
-## Example questions to try
+---
 
-Customer (Northstar Logistics / ACCT-001):
-- "Can I cancel my order without a cancellation fee?"
-- "My pickup is late, do I get a service credit?"
-- "What's your P1 response time for my account?"
+# ✨ Key Features
 
-Customer (Beacon Retail / ACCT-003, no custom contract):
-- "What's the cancellation fee if I cancel more than 30 minutes after
-  booking?"
+## 1. Natural-Language Support Chat
 
-Internal staff:
-- "Summarize open tickets for Northstar and tell me if any are at SLA risk."
-- "A pickup for LumenWorks was 5 hours late due to carrier fault - is a
-  credit due, and can you create a follow-up task to verify it?"
-- "Escalate TKT-505 immediately." (should be recognised as a security
-  incident and escalated with urgency)
+Users can ask questions such as:
 
-The system is not hard-coded to these examples - it loads and reasons over
-whatever accounts/orders/tickets exist in the workbook and whatever text is
-in the PDFs, so it should generalise to other records from the same pack.
+> Can Northstar cancel ORD-1001 without a cancellation fee?
+
+The agent identifies the relevant account, order information, and applicable policy/agreement before producing an answer.
+
+---
+
+## 2. Document Retrieval
+
+The application searches the supplied ParcelPilot documents to retrieve relevant information from:
+
+- Support Policy v3
+- Support Policy v2 (deprecated)
+- Cancellation & Service Credit SOP
+- Product Operations Guide & Known Issues
+- Northstar Logistics Enterprise Agreement
+- LumenWorks Service Agreement
+
+The system does not rely only on the LLM's general knowledge for policy-sensitive questions.
+
+---
+
+## 3. Structured Operational Data
+
+The application works with the supplied ParcelPilot assessment dataset containing account, order, and ticket information.
+
+Structured data is used for questions involving:
+
+- Accounts
+- Orders
+- Tickets
+- Ticket status
+- Order status
+- SLA calculations
+- Operational investigation
+
+---
+
+## 4. Source Precedence & Reliability
+
+Different sources have different authority levels.
+
+The application follows this precedence:
+
+```text
+1. Current signed customer agreement
+                ↓
+2. Current company-wide policy / SOP
+                ↓
+3. Current product documentation
+                ↓
+4. Deprecated documents / historical ticket information
