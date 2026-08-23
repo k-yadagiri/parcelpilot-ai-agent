@@ -9,7 +9,7 @@ plus the tool-level access control and confirmation gating in tools.py.
 """
 from __future__ import annotations
 
-from langchain_anthropic import ChatAnthropic
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langgraph.prebuilt import create_react_agent
 from langgraph.checkpoint.memory import MemorySaver
 
